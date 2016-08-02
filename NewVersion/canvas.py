@@ -211,7 +211,7 @@ class Canvas:
         return False
 
     def evaluate(self):
-        weight = [10, 801, 382, 79, 74, 10]
+        weight = [10, 1801, 1382, 79, 74, 10]
 
         # piece difference : p
         if self.piece_num[2] > self.piece_num[1]:
@@ -274,9 +274,9 @@ class Canvas:
                         frontier_b += 1
 
         if frontier_b > frontier_w:
-            f = -100 * frontier_b / (frontier_b + frontier_w)
+            f = -100 * frontier_b / float(frontier_b + frontier_w)
         elif frontier_b < frontier_w:
-            f = 100 * frontier_w / (frontier_b + frontier_w)
+            f = 100 * frontier_w / float(frontier_b + frontier_w)
         else:
             f = 0
 

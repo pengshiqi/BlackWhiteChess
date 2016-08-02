@@ -2,6 +2,9 @@
 
 import copy
 from time import sleep
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 from graphics import *
 from canvas import Button, Cell, Canvas
@@ -10,6 +13,7 @@ __author__ = 'patrick_psq'
 
 max_num = 99999999999
 max_depth = 3
+
 
 # 复制canvas对象
 def duplicate(c):
@@ -109,7 +113,7 @@ if __name__ == '__main__':
     black_win = Text(Point(700, 300), "BLACK WIN!")
     black_win.setSize(30)
     black_win.setOutline('red')
-    tie=Text(Point(700, 300), "TIE!")
+    tie = Text(Point(700, 300), "TIE!")
     tie.setSize(30)
     tie.setOutline('red')
 
@@ -136,6 +140,9 @@ if __name__ == '__main__':
             win.setBackground('light blue')
 
             canvas = Canvas(win)  # init the canvas
+
+            logging.info('A new game starts!')
+
             while 1:
                 # 黑子是否可以落子
                 whether_black = canvas.check_black()
@@ -147,20 +154,19 @@ if __name__ == '__main__':
                         break
                     for i in range(8):
                         for j in range(8):
-                            if canvas.board[i][j].clicked(p2) and canvas.check(i, j, 1 + (canvas.total_num + 1) % 2):
-                                canvas.click(i, j, 1 + (canvas.total_num + 1) % 2)
-                                canvas.piece_num[1 + (canvas.total_num + 1) % 2] += 1  # 更新棋盘上两种颜色的棋子数
-                                # 白色落子
-                                if 1 + (canvas.total_num + 1) % 2 == 1:
-                                    white_turn.undraw()
-                                    black_turn.draw(win)
-                                # 黑色落子
-                                else:
-                                    black_turn.undraw()
-                                    white_turn.draw(win)
+                            if canvas.board[i][j].clicked(p2) and canvas.check(i, j, 2):
+                                canvas.click(i, j, 2)
+                                logging.info('BLACK places at (%s, %s)' % (i, j))
+                                canvas.piece_num[2] += 1  # 更新棋盘上两种颜色的棋子数
+
+                                # 黑色落子,光标移动,轮到白色
+                                black_turn.undraw()
+                                white_turn.draw(win)
+
                                 canvas.total_num += 1
                                 refresh()
                                 whether_clicked = True  # 标记为已经落子
+
                 if not whether_black:
                     # 黑色不能落子
                     black_turn.undraw()
@@ -177,15 +183,15 @@ if __name__ == '__main__':
                         # AI--------------------------------------------------
                         # 找出白色的最佳落子坐标
                         [best_x, best_y] = find_the_best(canvas)
-
+                        logging.info('WHITE places at (%s, %s)' % (best_x, best_y))
                         canvas.click(best_x, best_y, 1)
+
                         canvas.piece_num[1] += 1
                         canvas.total_num += 1
+                        refresh()
 
                     white_turn.undraw()
                     black_turn.draw(win)
-                    refresh()
-
 
                 # check whether someone wins
                 who_win = 0
@@ -201,6 +207,7 @@ if __name__ == '__main__':
                                 whether_white = True
                             if canvas.board[i][j].color == 0 and canvas.check(i, j, 2):
                                 whether_black = True
+
                     if (not whether_white) and (not whether_black):
                         b_re.redraw()  # 显示restart按钮
                         if canvas.piece_num[1] > canvas.piece_num[2]:
@@ -213,30 +220,34 @@ if __name__ == '__main__':
                             who_win = 0  # 平局
                             tie.draw(win)
                         game_over = True
-                    elif (not whether_white) or (not whether_black):
-                        # 白子回合
-                        if 1 + (canvas.total_num + 1) % 2 == 1:
-                                white_turn.undraw()
-                                black_turn.draw(win)
-                        # 黑子回合
-                        elif 1 + (canvas.total_num + 1) % 2 == 2:
-                                black_turn.undraw()
-                                white_turn.draw(win)
-                        canvas.total_num += 1
-                elif canvas.piece_num[1] == 0:
-                # 无白子， 黑色获胜
+
+                    # elif (not whether_white) or (not whether_black):
+                    #     # 白子回合
+                    #     if 1 + (canvas.total_num + 1) % 2 == 1:
+                    #             white_turn.undraw()
+                    #             black_turn.draw(win)
+                    #     # 黑子回合
+                    #     elif 1 + (canvas.total_num + 1) % 2 == 2:
+                    #             black_turn.undraw()
+                    #             white_turn.draw(win)
+                    #     canvas.total_num += 1
+
+                if canvas.piece_num[1] == 0:
+                    # 无白子， 黑色获胜
                     who_win = 2
                     b_re.redraw()
                     black_win.draw(win)
                     game_over = True
+
                 elif canvas.piece_num[2] == 0:
-                # 无黑子， 白色获胜
+                    # 无黑子， 白色获胜
                     who_win = 1
                     b_re.redraw()
                     white_win.draw(win)
                     game_over = True
+
                 elif canvas.piece_num[1] + canvas.piece_num[2] == 64:
-                # 棋盘下满
+                    # 棋盘下满
                     b_re.redraw()
                     if canvas.piece_num[1] > canvas.piece_num[2]:
                         who_win = 1
@@ -257,10 +268,14 @@ if __name__ == '__main__':
                             for i in canvas.board:
                                  for j in i:
                                     j.clear()
-                            if 1 + (canvas.total_num + 1) % 2 == 1:
+                            try:
                                 white_turn.undraw()
-                            else:
+                            except:
+                                pass
+                            try:
                                 black_turn.undraw()
+                            except:
+                                pass
 
                             black_turn.draw(win)
                             canvas.restart(win)
@@ -274,6 +289,8 @@ if __name__ == '__main__':
                                 white_win.undraw()
                             else:
                                 black_win.undraw()
+
+                            logging.info('A new game starts!')
 
                             break
 
