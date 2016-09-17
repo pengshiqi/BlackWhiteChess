@@ -1,15 +1,17 @@
+#!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
 import copy
-from time import sleep
 import logging
+from time import sleep
 
-logging.basicConfig(level=logging.INFO)
-
+import calculate
 from graphics import *
 from canvas import Button, Cell, Canvas
 
 __author__ = 'patrick_psq'
+
+logging.basicConfig(level=logging.INFO)
 
 max_num = 99999999999
 max_depth = 3
@@ -35,6 +37,7 @@ def find_the_best(canvas):
             if canvas.board[i][j].color == 0 and canvas.check(i, j, 1):
                 new_canvas = duplicate(canvas)
                 new_canvas.imaginary_click(i, j, 1)
+                # debug(new_canvas)
                 value = minimax(new_canvas, max_depth, -max_num, max_num, True)
                 if value < min_value:
                     min_value = value
@@ -49,15 +52,17 @@ def minimax(can, depth, alpha, beta, MaxmizingPlayer):
     else:
         is_terminal = not can.check_white()
     if depth == 0 or is_terminal:
+        # debug(can)
         return can.evaluate()
 
     if MaxmizingPlayer:
-        bestValue = -9999999999
+        bestValue = -max_num
         for i in range(8):
             for j in range(8):
                 if can.board[i][j].color == 0 and can.check(i, j, 2):
                     new_canvas = duplicate(can)
                     new_canvas.imaginary_click(i, j, 2)
+                    # debug(new_canvas)
                     v = minimax(new_canvas, depth - 1, alpha, beta, False)
                     bestValue = max(bestValue, v)
                     alpha = max(alpha, bestValue)
@@ -65,12 +70,13 @@ def minimax(can, depth, alpha, beta, MaxmizingPlayer):
                         break
         return bestValue
     else:
-        bestValue = 9999999999
+        bestValue = max_num
         for i in range(8):
             for j in range(8):
                 if can.board[i][j].color == 0 and can.check(i, j, 1):
                     new_canvas = duplicate(can)
                     new_canvas.imaginary_click(i, j, 1)
+                    # debug(new_canvas)
                     v = minimax(new_canvas, depth - 1, alpha, beta, True)
                     bestValue = min(bestValue, v)
                     beta = min(beta, bestValue)
@@ -83,6 +89,7 @@ def minimax(can, depth, alpha, beta, MaxmizingPlayer):
 def refresh():
     t_white.setText("WHITE:%d" % canvas.piece_num[1])
     t_black.setText("BLACK:%d" % canvas.piece_num[2])
+
 
 if __name__ == '__main__':
 
@@ -179,10 +186,17 @@ if __name__ == '__main__':
                     # 如果白色可以落子
 
                     if canvas.check_white():
-                        # sleep(0.5)
+                        sleep(0.2)
                         # AI--------------------------------------------------
                         # 找出白色的最佳落子坐标
-                        [best_x, best_y] = find_the_best(canvas)
+                        # [best_x, best_y] = find_the_best(canvas)
+                        a = calculate.intArray(64)
+                        for i in xrange(8):
+                            for j in xrange(8):
+                                a[i * 8 + j] = canvas.board[i][j].color
+                        best_place = calculate.find_the_best(a)
+                        best_x = best_place / 10
+                        best_y = best_place % 10
                         logging.info('WHITE places at (%s, %s)' % (best_x, best_y))
                         canvas.click(best_x, best_y, 1)
 
@@ -197,16 +211,10 @@ if __name__ == '__main__':
                 who_win = 0
                 game_over = False
 
-                if canvas.total_num < 64:
+                if canvas.piece_num[1] + canvas.piece_num[2] < 64:
                     # 白色和黑色是否可以落子
-                    whether_white = False
-                    whether_black = False
-                    for i in range(8):
-                        for j in range(8):
-                            if canvas.board[i][j].color == 0 and canvas.check(i, j, 1):
-                                whether_white = True
-                            if canvas.board[i][j].color == 0 and canvas.check(i, j, 2):
-                                whether_black = True
+                    whether_white = canvas.check_white()
+                    whether_black = canvas.check_black()
 
                     if (not whether_white) and (not whether_black):
                         b_re.redraw()  # 显示restart按钮
@@ -220,17 +228,6 @@ if __name__ == '__main__':
                             who_win = 0  # 平局
                             tie.draw(win)
                         game_over = True
-
-                    # elif (not whether_white) or (not whether_black):
-                    #     # 白子回合
-                    #     if 1 + (canvas.total_num + 1) % 2 == 1:
-                    #             white_turn.undraw()
-                    #             black_turn.draw(win)
-                    #     # 黑子回合
-                    #     elif 1 + (canvas.total_num + 1) % 2 == 2:
-                    #             black_turn.undraw()
-                    #             white_turn.draw(win)
-                    #     canvas.total_num += 1
 
                 if canvas.piece_num[1] == 0:
                     # 无白子， 黑色获胜

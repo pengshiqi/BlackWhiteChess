@@ -203,15 +203,18 @@ class Canvas:
         self.board[4][3] = Cell(1, 4, 3, win)
 
     def whether_frontier(self, x, y):
-        for i in range(8):
-            xx = x + self.fx[i][0]
-            yy = y + self.fx[i][1]
-            if 0 <= xx < 8 and 0 <= yy < 8 and self.board[xx][yy].color == 0:
-                return True
+        # for i in range(8):
+        #     xx = x + self.fx[i][0]
+        #     yy = y + self.fx[i][1]
+        #     if 0 <= xx < 8 and 0 <= yy < 8 and self.board[xx][yy].color == 0:
+        #         return True
+        # return False
+        if x == 0 or x == 7 or y == 0 or y == 7:
+            return True
         return False
 
     def evaluate(self):
-        weight = [10, 1801, 1382, 79, 74, 10]
+        weight = [100, 400, 200, 80, 200, 20]
 
         # piece difference : p
         if self.piece_num[2] > self.piece_num[1]:
