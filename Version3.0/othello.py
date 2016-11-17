@@ -190,13 +190,22 @@ if __name__ == '__main__':
                         # AI--------------------------------------------------
                         # 找出白色的最佳落子坐标
                         # [best_x, best_y] = find_the_best(canvas)
-                        a = calculate.intArray(64)
+                        # a = calculate.intArray(64)
+                        a = []
                         for i in xrange(8):
+                            lst = []
                             for j in xrange(8):
-                                a[i * 8 + j] = canvas.board[i][j].color
-                        best_place = calculate.find_the_best(a)
-                        best_x = best_place / 10
-                        best_y = best_place % 10
+                                if canvas.board[i][j].color == 1:
+                                    lst.append(-1) # white
+                                elif canvas.board[i][j].color == 2:
+                                    lst.append(1) # black
+                                else:
+                                    lst.append(0) # empty
+                            a.append(lst)
+
+                        [best_x, best_y] = calculate.find_the_best(a)
+                        # [best_x, best_y] = find_the_best(canvas)
+
                         logging.info('WHITE places at (%s, %s)' % (best_x, best_y))
                         canvas.click(best_x, best_y, 1)
 

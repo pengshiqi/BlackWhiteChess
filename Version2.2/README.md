@@ -7,3 +7,9 @@ Using Minimax Algorithm and Alpha-Beta Pruning.
 Having different modes.(Human VS Human and Human VS AI)
 
 Having different levels.
+
+Run othello.py to play the game!
+
+```
+python othello.py
+```

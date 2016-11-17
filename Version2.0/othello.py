@@ -101,11 +101,16 @@ if __name__ == '__main__':
     t1.setSize(36)
     t1.draw(win)
     t2 = Text(Point(400, 250), "Author: patrick_psq")  # author name
-    t2.setSize(26)
+    t2.setSize(20)
     t2.draw(win)
 
     b_start = Button(win, Point(400, 400), 140, 80, "Start")  # start button
     b_start.activate()
+    # b_start_easy = Button(win, Point(300, 400), 140, 80, "Start Easy Mode")
+    # b_start_easy.activate()
+    # b_start_hard = Button(win, Point(500, 400), 140, 80, "Start Hard Mode")
+    # b_start_hard.activate()
+
     b_qt = Button(win, Point(750, 575), 100, 50, "Quit")  # quit button
     b_qt.activate()
 

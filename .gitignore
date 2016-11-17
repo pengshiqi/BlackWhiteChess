@@ -1,5 +1,2 @@
 *.pyc
 .idea
-_calculate.so
-calculate_wrap.c
-calculate.py

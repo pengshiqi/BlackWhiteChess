@@ -134,8 +134,8 @@ def intArray_frompointer(t):
 intArray_frompointer = _calculate.intArray_frompointer
 
 
-def find_the_best(arr, currBotColor):
-    return _calculate.find_the_best(arr, currBotColor)
+def find_the_best(arr):
+    return _calculate.find_the_best(arr)
 find_the_best = _calculate.find_the_best
 # This file is compatible with both classic and new-style classes.
 

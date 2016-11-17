@@ -2,13 +2,14 @@
 # -*- coding:utf-8 -*-
 
 # playerType: 0 -> Human VS Human, 1 -> Human VS AI
-# difficultLevel: 0 -> easyModeAI, 1 -> hardModeAI
+# difficultLevel: 0 -> easyModeAI, 1 -> mediumModeAI, 2 -> hardModeAI
 
 import copy
 import logging
 from time import sleep
 
 import easyModeAI.calculate
+import mediumModeAI.calculate
 import hardModeAI.calculate
 from graphics import *
 from canvas import Button, Cell, Canvas
@@ -16,78 +17,6 @@ from canvas import Button, Cell, Canvas
 __author__ = 'patrick_psq'
 
 logging.basicConfig(level=logging.INFO)
-
-max_num = 99999999999
-max_depth = 3
-
-
-# 复制canvas对象
-def duplicate(c):
-    new_c = copy.copy(c)
-    new_c.board = copy.copy(c.board)
-    for i in range(8):
-        new_c.board[i] = copy.copy(c.board[i])
-        for j in range(8):
-            new_c.board[i][j] = copy.copy(c.board[i][j])
-    new_c.piece_num = copy.copy(c.piece_num)
-    return new_c
-
-
-def find_the_best(canvas):
-    best_x = best_y = -1
-    min_value = max_num
-    for i in range(8):
-        for j in range(8):
-            if canvas.board[i][j].color == 0 and canvas.check(i, j, 1):
-                new_canvas = duplicate(canvas)
-                new_canvas.imaginary_click(i, j, 1)
-                # debug(new_canvas)
-                value = minimax(new_canvas, max_depth, -max_num, max_num, True)
-                if value < min_value:
-                    min_value = value
-                    best_x = i
-                    best_y = j
-    return [best_x, best_y]
-
-
-def minimax(can, depth, alpha, beta, MaxmizingPlayer):
-    if MaxmizingPlayer:
-        is_terminal = not can.check_black()
-    else:
-        is_terminal = not can.check_white()
-    if depth == 0 or is_terminal:
-        # debug(can)
-        return can.evaluate()
-
-    if MaxmizingPlayer:
-        bestValue = -max_num
-        for i in range(8):
-            for j in range(8):
-                if can.board[i][j].color == 0 and can.check(i, j, 2):
-                    new_canvas = duplicate(can)
-                    new_canvas.imaginary_click(i, j, 2)
-                    # debug(new_canvas)
-                    v = minimax(new_canvas, depth - 1, alpha, beta, False)
-                    bestValue = max(bestValue, v)
-                    alpha = max(alpha, bestValue)
-                    if beta <= alpha:
-                        break
-        return bestValue
-    else:
-        bestValue = max_num
-        for i in range(8):
-            for j in range(8):
-                if can.board[i][j].color == 0 and can.check(i, j, 1):
-                    new_canvas = duplicate(can)
-                    new_canvas.imaginary_click(i, j, 1)
-                    # debug(new_canvas)
-                    v = minimax(new_canvas, depth - 1, alpha, beta, True)
-                    bestValue = min(bestValue, v)
-                    beta = min(beta, bestValue)
-                    if beta <= alpha:
-                        break
-        return bestValue
-
 
 # 刷新双方棋子信息
 def refresh():
@@ -121,7 +50,9 @@ if __name__ == '__main__':
 
     b_start_easy = Button(win, Point(450, 450), 100, 60, "Start Easy Mode")
     b_start_easy.activate()
-    b_start_hard = Button(win, Point(580, 450), 100, 60, "Start Hard Mode")
+    b_start_medium = Button(win, Point(580, 450), 100, 60, "Start Medium Mode")
+    b_start_medium.activate()
+    b_start_hard = Button(win, Point(710, 450), 100, 60, "Start Hard Mode")
     b_start_hard.activate()
 
     b_qt = Button(win, Point(750, 575), 100, 50, "Quit")  # quit button
@@ -164,8 +95,10 @@ if __name__ == '__main__':
 
             if b_start_easy.clicked(p1):
                 difficultLevel = 0
-            if b_start_hard.clicked(p1):
+            if b_start_medium.clicked(p1):
                 difficultLevel = 1
+            if b_start_hard.clicked(p1):
+                difficultLevel = 2
 
             t1.undraw()
             t2.undraw()  # Un-draw game name and author name
@@ -174,6 +107,7 @@ if __name__ == '__main__':
 
             b_start.clear()  # clear start button
             b_start_easy.clear()
+            b_start_medium.clear()
             b_start_hard.clear()
 
             t_white.draw(win)
@@ -218,7 +152,6 @@ if __name__ == '__main__':
                     if b_undo.clicked(p2):  # 如果点击悔棋
                         canvas.undo(undoList, win)
                         refresh()
-                        continue
 
                     for i in range(8):
                         for j in range(8):
@@ -280,23 +213,36 @@ if __name__ == '__main__':
                             # easyMode
                             if difficultLevel == 0:
                                 sleep(0.2)
+                                # AI--------------------------------------------------
+                                # 找出白色的最佳落子坐标
+                                # [best_x, best_y] = find_the_best(canvas)
                                 a = easyModeAI.calculate.intArray(64)
                                 for i in xrange(8):
                                     for j in xrange(8):
                                         a[i * 8 + j] = canvas.board[i][j].color
                                 best_place = easyModeAI.calculate.find_the_best(a)
 
-                            # hardMode
+                            # mediumMode
                             elif difficultLevel == 1:
                                 sleep(0.2)
-                                # AI--------------------------------------------------
-                                # 找出白色的最佳落子坐标
-                                # [best_x, best_y] = find_the_best(canvas)
-                                a = hardModeAI.calculate.intArray(64)
+                                a = mediumModeAI.calculate.intArray(64)
                                 for i in xrange(8):
                                     for j in xrange(8):
                                         a[i * 8 + j] = canvas.board[i][j].color
-                                best_place = hardModeAI.calculate.find_the_best(a)
+                                best_place = mediumModeAI.calculate.find_the_best(a)
+
+                            # hardMode
+                            elif difficultLevel == 2:
+                                a = hardModeAI.calculate.intArray(64)
+                                for i in xrange(8):
+                                    for j in xrange(8):
+                                        if canvas.board[i][j].color == 1: # white
+                                            a[i * 8 + j] = 0
+                                        elif canvas.board[i][j].color == 2: # black
+                                            a[i * 8 + j] = 1
+                                        else:
+                                            a[i * 8 + j] = -1
+                                best_place = hardModeAI.calculate.find_the_best(a, 0)
 
                             best_x = best_place / 10
                             best_y = best_place % 10

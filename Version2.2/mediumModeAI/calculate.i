@@ -7,4 +7,4 @@
 %include "carrays.i"
 %array_class(int, intArray);
 
-int find_the_best(int *arr, int currBotColor);
+int find_the_best(int *arr);
