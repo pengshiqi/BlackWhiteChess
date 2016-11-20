@@ -207,108 +207,17 @@ class Canvas:
         self.total_num = 0
         for i in xrange(8):
             for j in xrange(8):
-                self.board[i][j].clear()
-                self.board[i][j] = Cell(undoList[i][j], i, j, win)
+                if self.board[i][j].color != undoList[i][j]:
+                    self.board[i][j].clear()
+                    self.board[i][j] = Cell(undoList[i][j], i, j, win)
                 if undoList[i][j] == 1 or undoList[i][j] == 2:
                     self.total_num += 1
                     self.piece_num[undoList[i][j]] += 1
 
-    def whether_frontier(self, x, y):
-        # for i in range(8):
-        #     xx = x + self.fx[i][0]
-        #     yy = y + self.fx[i][1]
-        #     if 0 <= xx < 8 and 0 <= yy < 8 and self.board[xx][yy].color == 0:
-        #         return True
-        # return False
-        if x == 0 or x == 7 or y == 0 or y == 7:
-            return True
-        return False
-
-    def evaluate(self):
-        weight = [100, 400, 200, 80, 200, 20]
-
-        # piece difference : p
-        if self.piece_num[2] > self.piece_num[1]:
-            p = 100 * self.piece_num[2] / self.total_num
-        elif self.piece_num[2] < self.piece_num[1]:
-            p = -100 * self.piece_num[1] / self.total_num
-        else:
-            p = 0
-
-        # corner occupancy : c
-        corner_b = corner_w = 0
-        corner = [(0, 0), (0, 7), (7, 0), (7, 7)]
-        for i in range(4):
-            if self.board[corner[i][0]][corner[i][1]] == 1:
-                corner_w += 1
-            elif self.board[corner[i][0]][corner[i][1]] == 2:
-                corner_b += 1
-        c = 25 * (corner_b - corner_w)
-
-        # corner closeness : l
-        adj_b = adj_w = 0
-        adj_area = [(0, 1), (1, 0), (1, 1),
-                    (0, 6), (1, 7), (1, 6),
-                    (6, 0), (6, 1), (7, 1),
-                    (6, 6), (6, 7), (7, 6)]
-        for i in range(12):
-            if self.board[adj_area[i][0]][adj_area[i][1]] == 1:
-                adj_w += 1
-            elif self.board[adj_area[i][0]][adj_area[i][1]] == 2:
-                adj_b += 1
-        l = 12.5 * (adj_w - adj_b)
-
-        # Mobility : m
-        mob_b = mob_w = 0
-        for i in range(8):
-            for j in range(8):
-                if self.board[i][j].color == 0:
-                    if self.check(i, j, 1):
-                        mob_w += 1
-                    if self.check(i, j, 2):
-                        mob_b += 1
-        if mob_b > mob_w:
-            m = 100 * mob_b / (mob_b + mob_w)
-        elif mob_b < mob_w:
-            m = -100 * mob_w / (mob_b + mob_w)
-        else:
-            m = 0
-        if mob_b == 0 or mob_w == 0:
-            m = 0
-
-        # frontier discs: f
-        frontier_b = frontier_w = 0
-        for i in range(8):
-            for j in range(8):
-                if self.board[i][j].color == 1:
-                    if self.whether_frontier(i, j):
-                        frontier_w += 1
-                elif self.board[i][j].color == 2:
-                    if self.whether_frontier(i, j):
-                        frontier_b += 1
-
-        if frontier_b > frontier_w:
-            f = -100 * frontier_b / float(frontier_b + frontier_w)
-        elif frontier_b < frontier_w:
-            f = 100 * frontier_w / float(frontier_b + frontier_w)
-        else:
-            f = 0
-
-        # disc squares: d
-        squares = [[20, -3, 11, 8, 8, 11, -3, 20],
-                   [-3, -7, -4, 1, 1, -4, -7, -3],
-                   [11, -4, 2, 2, 2, 2, -4, 11],
-                   [8, 1, 2, -3, -3, 2, 1, 8],
-                   [8, 1, 2, -3, -3, 2, 1, 8],
-                   [11, -4, 2, 2, 2, 2, -4, 11],
-                   [-3, -7, -4, 1, 1, -4, -7, -3],
-                   [20, -3, 11, 8, 8, 11, -3, 20]]
-        d = 0
-        for i in range(8):
-            for j in range(8):
-                if self.board[i][j].color == 1:
-                    d -= squares[i][j]
-                elif self.board[i][j].color == 2:
-                    d += squares[i][j]
-
-        return weight[0] * p + weight[1] * c + weight[2] * l + weight[3] * m + weight[4] * f + weight[5] * d
+    def show(self):
+        for i in xrange(8):
+            for j in xrange(8):
+                print self.board[j][i].color,
+            print
+        print "White: ", self.piece_num[1]
+        print "Black: ", self.piece_num[2]

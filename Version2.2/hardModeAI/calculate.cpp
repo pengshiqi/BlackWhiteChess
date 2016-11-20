@@ -14,9 +14,6 @@
 #include <bitset>
 #include <string>
 #include <ctime>
-#ifdef __linux__
-#include <unistd.h>
-#endif
 
 using namespace std;
 
@@ -85,7 +82,6 @@ const short charaTable[10][10] =
 
 const short dir[8][2] = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,1},{1,-1},{1,0},{1,1}};
 
-enum playerType { Human, AI };
 enum Status { White, Black, Empty, Valid };    //Then status<Empty: Have Stone on It, status>=Empty: Truly Empty
 //White=false & Black=true
 
@@ -99,8 +95,9 @@ clock_t evalTime = 0;
 int moveTimes = 0;
 int evalTimes = 0;
 
-struct Board
+class Board
 {
+public:
     bool sideFlag;
     short statusCount[4];
     Status status[10][10];
@@ -539,7 +536,7 @@ struct Board
         for (int i = 1; i <= 8; i++)
         {
             for (int j = 1; j <= 8; j++)
-                cout << status[i][j] << ' ';
+                cout << status[j][i] << ' ';
             cout << endl;
         }
     }
@@ -583,7 +580,7 @@ struct Board
     inline short toOne(const short C[2])const { return 8 * (C[0] - 1) + C[1] - 1; }
 };
 
-int Ajax(const Board&, short, int, int, short[2]);
+int MiniMax(const Board&, short, int, int, short[2]);
 
 Board gameBoard;
 bool playerSide;
@@ -1028,7 +1025,7 @@ const int Board::eval()const
 
 inline int rsgn(int x) { return x % 2 ? 1 : -1; }
 
-int Ajax(const Board &board, short depth, int alpha, int beta, short bestCoord[2])
+int MiniMax(const Board &board, short depth, int alpha, int beta, short bestCoord[2])
 {
     if (board.isWin(board.sideFlag))
         return BETA - 2000 + 24 * board.isWin(board.sideFlag) + depth;
@@ -1052,7 +1049,7 @@ int Ajax(const Board &board, short depth, int alpha, int beta, short bestCoord[2
 
         int Eval;
 
-        Eval = -Ajax(mainTmp, depth - 1, -beta, -alpha, bestCoord);
+        Eval = -MiniMax(mainTmp, depth - 1, -beta, -alpha, bestCoord);
 
         if (Eval >= beta)
             return beta;
@@ -1066,7 +1063,7 @@ int Ajax(const Board &board, short depth, int alpha, int beta, short bestCoord[2
         Board mainTmp = board;
         mainTmp.fastmove(board.validCoord[0]);
 
-        Eval = -Ajax(mainTmp, depth - 1, -beta, -alpha, bestCoord);
+        Eval = -MiniMax(mainTmp, depth - 1, -beta, -alpha, bestCoord);
         if (Eval >= beta)
         {
             if (depth == maxDepth)
@@ -1092,11 +1089,11 @@ int Ajax(const Board &board, short depth, int alpha, int beta, short bestCoord[2
             Board tmpBoard = board;
             tmpBoard.fastmove(board.validCoord[i]);
 
-            Eval = -Ajax(tmpBoard, depth - 1, -alpha - MINWINDOW, -alpha, bestCoord);
+            Eval = -MiniMax(tmpBoard, depth - 1, -alpha - MINWINDOW, -alpha, bestCoord);
 
             if (Eval > alpha && Eval < beta)
             {
-                Eval = -Ajax(tmpBoard, depth - 1, -beta, -alpha - MINWINDOW, bestCoord);
+                Eval = -MiniMax(tmpBoard, depth - 1, -beta, -alpha - MINWINDOW, bestCoord);
             }
             if (Eval >= beta)
             {
@@ -2017,14 +2014,24 @@ int find_the_best(int *arr, int currBotColor)
 {
     startTime = clock();
     tc = false;
-    cout << "StartTime: " << startTime << endl;
-    cout << "tc: " << tc << endl;
+    //ul = false;
     gameBoard.update(arr, currBotColor);
 
     gameBoard.setValid_fast();
     gameBoard.count();
 
-    //gameBoard.show();
+    // gameBoard.show();
+    turnID = gameBoard.statusCount[0] + gameBoard.statusCount[1] - 4;
+    // cout << "TurnID: " << turnID << endl;
+
+    if (gameBoard.statusCount[Valid] == 1)
+        for (int i = 1; i <= 8; i++)
+            for (int j = 1; j <= 8; j++)
+                if (gameBoard.status[i][j] == Valid)
+                {
+                    // cout << "find_the_best only one: " <<  (i - 1) * 10 + j - 1 << endl;
+                    return (i - 1) * 10 + j - 1;
+                }
 
     int chara = gameBoard.charaCalc();
     uglyList(chara);
@@ -2034,14 +2041,9 @@ int find_the_best(int *arr, int currBotColor)
         moveTime = 0;
         moveTimes = 0;
 
-        if ((!gameBoard.statusCount[Valid]) && (gameBoard.sideFlag != playerSide))
+        if (!gameBoard.statusCount[Valid])
         {
-            Json::Value ret;
-            ret["response"]["x"] = -1;
-            ret["response"]["y"] = -1;
-            Json::FastWriter writer;
-            cout << writer.write(ret) << endl;
-            return 0;
+            return -11;
         }
 
         size_t validCount = gameBoard.statusCount[Valid];
@@ -2153,10 +2155,11 @@ int find_the_best(int *arr, int currBotColor)
         int lastR = 0;
         short lastCoord[2] = {};
 
+        // cout << "Search function called!" << endl;
         for (; !timeOut() && maxDepth < 25;
                lastR = R, lastCoord[0] = inputCoord[0], lastCoord[1] = inputCoord[1], maxDepth++)
         {
-            R = Ajax(gameBoard, maxDepth, ALPHA, BETA, inputCoord);
+            R = MiniMax(gameBoard, maxDepth, ALPHA, BETA, inputCoord);
 
             if (abs(R) > BETA - 3000 && abs(lastR) > BETA - 3000)
                 break;
@@ -2178,5 +2181,6 @@ int find_the_best(int *arr, int currBotColor)
         iv = true;
     }
 
+    // cout << "find_the_best: " <<  (inputCoord[0] - 1) * 10 + (inputCoord[1] - 1) << endl;
     return (inputCoord[0] - 1) * 10 + (inputCoord[1] - 1);
 }

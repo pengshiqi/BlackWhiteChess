@@ -13,3 +13,12 @@ Run othello.py to play the game!
 ```
 python othello.py
 ```
+
+----
+
+Commands to compile the .cpp files
+
+```
+swig -python calculate.i
+g++ -fPIC -shared calculate_wrap.c -o _calculate.so -I/usr/include/python2.7/ -lpython2.7
+```

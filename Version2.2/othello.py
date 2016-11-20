@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
 # playerType: 0 -> Human VS Human, 1 -> Human VS AI
@@ -61,11 +60,11 @@ if __name__ == '__main__':
 
     t_skip_white = Text(Point(700, 300), "White SKIP a turn!")
     t_skip_white.setSize(20)
-    t_skip_white.setOutline('white')
+    t_skip_white.setOutline('red')
 
     t_skip_black = Text(Point(700, 300), "Black SKIP a turn!")
     t_skip_black.setSize(20)
-    t_skip_black.setOutline('black')
+    t_skip_black.setOutline('red')
 
     b_start = Button(win, Point(400, 350), 100, 60, "Start")  # start button
     b_start.activate()
@@ -109,7 +108,7 @@ if __name__ == '__main__':
         p1 = win.getMouse()
         if b_qt.clicked(p1):
             break
-        elif b_start.clicked(p1) or b_start_easy.clicked(p1) or b_start_hard.clicked(p1):
+        elif b_start.clicked(p1) or b_start_easy.clicked(p1) or b_start_medium.clicked(p1) or b_start_hard.clicked(p1):
             if b_start.clicked(p1):
                 playerType = 0
             else:
@@ -157,6 +156,7 @@ if __name__ == '__main__':
                         [0, 0, 0, 0, 0, 0, 0, 0]
                         ]
 
+            # Game Starts!
             while 1:
                 # 黑子是否可以落子
                 blackHasValidMove = canvas.check_black()
@@ -183,6 +183,8 @@ if __name__ == '__main__':
                                 logging.info('BLACK places at (%s, %s)' % (i, j))
                                 canvas.piece_num[2] += 1  # 更新棋盘上两种颜色的棋子数
 
+                                # canvas.show()
+
                                 # 黑色落子,光标移动,轮到白色
                                 black_turn.undraw()
                                 white_turn.draw(win)
@@ -202,6 +204,7 @@ if __name__ == '__main__':
                     # canvas.total_num += 1
                     blackClicked = True
 
+                # 黑色已落子
                 if blackClicked:
                     # 如果黑色已经落子，则轮到白色方落子
                     # 如果白色可以落子
@@ -259,6 +262,7 @@ if __name__ == '__main__':
 
                             # hardMode
                             elif difficultLevel == 2:
+                                # canvas.show()
                                 a = hardModeAI.calculate.intArray(64)
                                 for i in xrange(8):
                                     for j in xrange(8):
@@ -269,14 +273,18 @@ if __name__ == '__main__':
                                         else:
                                             a[i * 8 + j] = -1
                                 best_place = hardModeAI.calculate.find_the_best(a, 0)
+                                # print "best place: ", best_place
 
                             best_x = best_place / 10
                             best_y = best_place % 10
                             logging.info('WHITE places at (%s, %s)' % (best_x, best_y))
 
                             canvas.click(best_x, best_y, 1)
+
                             canvas.piece_num[1] += 1
                             canvas.total_num += 1
+
+                            # canvas.show()
                             refresh()
                     else:  # white doesn't have valid move
                         t_skip_white.draw(win)
