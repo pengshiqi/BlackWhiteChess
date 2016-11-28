@@ -432,7 +432,7 @@ if __name__ == '__main__':
                     pass
 
                 try:
-                    if restart:
+                    if b_qt.clicked(p3):
                         break
                 except:
                     pass
