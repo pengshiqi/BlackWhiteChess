@@ -87,12 +87,17 @@ class Canvas:
         for i in range(8):
             line = []
             for j in range(8):
-                line.append(Cell(0, i, j, win))
+                if (i == 3 and j == 3) or (i == 4 and j == 4):
+                    line.append(Cell(1, i, j, win))
+                elif (i == 3 and j == 4) or (i == 4 and j == 3):
+                    line.append(Cell(2, i, j, win))
+                else:
+                    line.append(Cell(0, i, j, win))
             self.board.append(line)
-        self.board[3][3] = Cell(1, 3, 3, win)
-        self.board[4][4] = Cell(1, 4, 4, win)
-        self.board[3][4] = Cell(2, 3, 4, win)
-        self.board[4][3] = Cell(2, 4, 3, win)
+        # self.board[3][3] = Cell(1, 3, 3, win)
+        # self.board[4][4] = Cell(1, 4, 4, win)
+        # self.board[3][4] = Cell(2, 3, 4, win)
+        # self.board[4][3] = Cell(2, 4, 3, win)
         self.piece_num = [0, 2, 2]  # 各种颜色棋子的数量
         self.total_num = 4  # 总棋子数量
         self.fx = [[1, 1], [1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [-1, 1], [0, 1]]

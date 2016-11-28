@@ -1027,11 +1027,14 @@ inline int rsgn(int x) { return x % 2 ? 1 : -1; }
 
 int MiniMax(const Board &board, short depth, int alpha, int beta, short bestCoord[2])
 {
+    // 输/赢时返回极大估值
+    // 且赢时的回合数越小、赢的子越多，返回的值越大，反之亦然
     if (board.isWin(board.sideFlag))
         return BETA - 2000 + 24 * board.isWin(board.sideFlag) + depth;
     if (board.isWin(!board.sideFlag))
         return ALPHA + 2000 - 24 * board.isWin(!board.sideFlag) - depth;
 
+    // 如果超时或搜索到达子节点，立即退出
     if (timeOut())
     {
         tc = true;
@@ -1040,6 +1043,7 @@ int MiniMax(const Board &board, short depth, int alpha, int beta, short bestCoor
     else if (!depth)
         return board.eval();
 
+    // 无可行位置时，直接进入下一层继续搜索
     if (!board.statusCount[Valid])
     {
         Board mainTmp = board;
@@ -1049,15 +1053,17 @@ int MiniMax(const Board &board, short depth, int alpha, int beta, short bestCoor
 
         int Eval;
 
+        // 带符号搜索下一层
         Eval = -MiniMax(mainTmp, depth - 1, -beta, -alpha, bestCoord);
 
-        if (Eval >= beta)
+        if (Eval >= beta)  // 如果返回值大于beta，被剪枝
             return beta;
-        if (Eval > alpha)
+        if (Eval > alpha)  // 大于alpha，刷新下界
             alpha = Eval;
     }
     else
     {
+        // 先将编号为0的节点搜索到底
         int Eval;
 
         Board mainTmp = board;
@@ -1083,6 +1089,7 @@ int MiniMax(const Board &board, short depth, int alpha, int beta, short bestCoor
             }
         }
 
+        // 再用最小窗口搜索其余节点
         size_t vSize = board.statusCount[Valid];
         for (size_t i = 1; i < vSize; i++)
         {
@@ -1091,13 +1098,14 @@ int MiniMax(const Board &board, short depth, int alpha, int beta, short bestCoor
 
             Eval = -MiniMax(tmpBoard, depth - 1, -alpha - MINWINDOW, -alpha, bestCoord);
 
+            // 最小窗口验证失败，重新搜索
             if (Eval > alpha && Eval < beta)
             {
                 Eval = -MiniMax(tmpBoard, depth - 1, -beta, -alpha - MINWINDOW, bestCoord);
             }
             if (Eval >= beta)
             {
-                if (depth == maxDepth)
+                if (depth == maxDepth) // 返回到最底层时
                 {
                     bestCoord[0] = board.validCoord[i][0];
                     bestCoord[1] = board.validCoord[i][1];
@@ -1108,7 +1116,7 @@ int MiniMax(const Board &board, short depth, int alpha, int beta, short bestCoor
             if (Eval > alpha)
             {
                 alpha = Eval;
-                if (depth == maxDepth)
+                if (depth == maxDepth) // 返回到最底层时
                 {
                     bestCoord[0] = board.validCoord[i][0];
                     bestCoord[1] = board.validCoord[i][1];
@@ -2012,8 +2020,18 @@ void uglyList(int chara)
 
 int find_the_best(int *arr, int currBotColor)
 {
-    startTime = clock();
+    rTmp = 1027;
+    passCount = 0;
+    maxDepth = 5;
+    PVS = 0;
+
     tc = false;
+    ul = false;
+    iv = false;
+
+    startTime = clock();
+
+    //tc = false;
     //ul = false;
     gameBoard.update(arr, currBotColor);
 
@@ -2181,6 +2199,26 @@ int find_the_best(int *arr, int currBotColor)
         iv = true;
     }
 
+    /*
+    Json::Value ret;
+    ret["response"]["x"] = inputCoord[0] - 1;
+    ret["response"]["y"] = inputCoord[1] - 1;
+
+    ret["debug"]["R"] = R;
+    ret["debug"]["TC"] = tc;
+    //ret["debug"]["UL"] = ul;
+    ret["debug"]["IV"] = iv;
+    ret["debug"]["MT"] = int(moveTime);
+    ret["debug"]["MTs"] = moveTimes;
+    ret["debug"]["ET"] = int(evalTime);
+    ret["debug"]["ETs"] = evalTimes;
+    ret["debug"]["ALL"] = int(clock() - startTime);
+    ret["debug"]["MD"] = maxDepth + R;
+    ret["debug"]["CHAR"] = gameBoard.charaCalc();
+
+    Json::FastWriter writer;
+    cout << writer.write(ret) << endl;
+    */
     // cout << "find_the_best: " <<  (inputCoord[0] - 1) * 10 + (inputCoord[1] - 1) << endl;
     return (inputCoord[0] - 1) * 10 + (inputCoord[1] - 1);
 }

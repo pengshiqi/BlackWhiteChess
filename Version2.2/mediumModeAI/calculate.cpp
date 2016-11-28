@@ -1,10 +1,19 @@
 #include <iostream>
+#include <ctime>
 #include "calculate.h"
 
 using namespace std;
 
 const int max_num = 99999999;
 const int max_depth = 5;
+const double TIME_OUT = 2.0;
+
+time_t startTime;
+
+bool time_out()
+{
+    return double(time(NULL) - startTime) > TIME_OUT;
+}
 
 Board::Board()
 {
@@ -248,7 +257,7 @@ int minimax(Board B, int depth, int alpha, int beta, bool MaxmizingPlayer)
   if (!MaxmizingPlayer)
     is_terminal = !B.check_white();
 
-  if (depth == 0 || is_terminal)
+  if (depth == 0 || is_terminal || time_out())
     return B.evaluate();
 
   if (MaxmizingPlayer)
@@ -289,6 +298,8 @@ int minimax(Board B, int depth, int alpha, int beta, bool MaxmizingPlayer)
 
 int find_the_best(int *arr)
 {
+  startTime = time(NULL);
+
   Board B(arr);
 
   // B.show_board();

@@ -22,41 +22,80 @@ def refresh():
     t_white.setText("WHITE:%d" % canvas.piece_num[1])
     t_black.setText("BLACK:%d" % canvas.piece_num[2])
 
+# 一些要用到的常量
 
-if __name__ == '__main__':
+restart = False
 
-    win = GraphWin("OTHELLO", 800, 600)
+win = GraphWin("OTHELLO", 800, 600)
+
+t1 = Text(Point(400, 130), "OTHELLO")  # game name
+t1.setSize(36)
+t2 = Text(Point(400, 230), "Author: patrick_psq")  # author name
+t2.setSize(20)
+t3 = Text(Point(250, 350), "Human VS Human : ")
+t3.setSize(15)
+t4 = Text(Point(250, 450), "Human VS AI : ")
+t4.setSize(15)
+
+text_row = []
+text_column = []
+for ch in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']:
+    text_ch = Text(Point((ord(ch) - ord('a')) * 60 + 90, 40), ch)
+    text_ch.setSize(20)
+    text_ch.setOutline('dark blue')
+    text_row.append(text_ch)
+for i in range(1, 9):
+    text_num = Text(Point(40, i * 60 + 30), str(i))
+    text_num.setSize(20)
+    text_num.setOutline('dark blue')
+    text_column.append(text_num)
+
+b_start = Button(win, Point(400, 350), 100, 60, "Start")  # start button
+b_start_easy = Button(win, Point(400, 450), 100, 60, "Start Easy Mode")
+b_start_medium = Button(win, Point(530, 450), 100, 60, "Start Medium Mode")
+b_start_hard = Button(win, Point(660, 450), 100, 60, "Start Hard Mode")
+b_qt = Button(win, Point(750, 575), 100, 50, "Quit")  # quit button
+
+t_white = Text(Point(700, 200), "WHITE:%d" % 2)  # white count
+t_white.setSize(25)
+t_black = Text(Point(700, 400), "BLACK:%d" % 2)  # black count
+t_black.setSize(25)
+
+b_re = Button(win, Point(700, 50), 190, 90, "Return to Main Menu")
+b_undo = Button(win, Point(700, 100), 100, 60, "Undo")
+
+
+def init_board():
 
     win.setBackground('white')
 
-    t1 = Text(Point(400, 130), "OTHELLO")  # game name
-    t1.setSize(36)
     t1.draw(win)
-    t2 = Text(Point(400, 230), "Author: patrick_psq")  # author name
-    t2.setSize(20)
     t2.draw(win)
-
-    t3 = Text(Point(250, 350), "Human VS Human : ")
-    t3.setSize(15)
     t3.draw(win)
-
-    t4 = Text(Point(250, 450), "Human VS AI : ")
-    t4.setSize(15)
     t4.draw(win)
 
-    text_row = []
-    text_column = []
-    for ch in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']:
-        text_ch = Text(Point((ord(ch) - ord('a')) * 60 + 90, 40), ch)
-        text_ch.setSize(20)
-        text_ch.setOutline('dark blue')
-        text_row.append(text_ch)
+    # b_start.activate()
+    # b_start_easy.activate()
+    # b_start_medium.activate()
+    # b_start_hard.activate()
+    b_start.clear()
+    b_start.redraw()
+    b_start_easy.clear()
+    b_start_easy.redraw()
+    b_start_medium.clear()
+    b_start_medium.redraw()
+    b_start_hard.clear()
+    b_start_hard.redraw()
 
-    for i in range(1, 9):
-        text_num = Text(Point(40, i * 60 + 30), str(i))
-        text_num.setSize(20)
-        text_num.setOutline('dark blue')
-        text_column.append(text_num)
+    # b_qt.activate()
+    b_qt.clear()
+    b_qt.redraw()
+
+    b_re.clear()
+    b_undo.clear()
+
+
+if __name__ == '__main__':
 
     t_skip_white = Text(Point(700, 300), "White SKIP a turn!")
     t_skip_white.setSize(20)
@@ -65,24 +104,6 @@ if __name__ == '__main__':
     t_skip_black = Text(Point(700, 300), "Black SKIP a turn!")
     t_skip_black.setSize(20)
     t_skip_black.setOutline('red')
-
-    b_start = Button(win, Point(400, 350), 100, 60, "Start")  # start button
-    b_start.activate()
-
-    b_start_easy = Button(win, Point(400, 450), 100, 60, "Start Easy Mode")
-    b_start_easy.activate()
-    b_start_medium = Button(win, Point(530, 450), 100, 60, "Start Medium Mode")
-    b_start_medium.activate()
-    b_start_hard = Button(win, Point(660, 450), 100, 60, "Start Hard Mode")
-    b_start_hard.activate()
-
-    b_qt = Button(win, Point(750, 575), 100, 50, "Quit")  # quit button
-    b_qt.activate()
-
-    t_white = Text(Point(700, 200), "WHITE:%d" % 2)  # white count
-    t_white.setSize(25)
-    t_black = Text(Point(700, 400), "BLACK:%d" % 2)  # black count
-    t_black.setSize(25)
 
     white_win = Text(Point(700, 300), "WHITE WIN!")
     white_win.setSize(30)
@@ -99,10 +120,7 @@ if __name__ == '__main__':
     black_turn = Circle(Point(600, 400), 10)
     black_turn.setFill('black')
 
-    b_re = Button(win, Point(700, 50), 190, 90, "Restart")
-    b_re.clear()
-    b_undo = Button(win, Point(700, 100), 100, 60, "Undo")
-    b_undo.clear()
+    init_board()
 
     while 1:
         p1 = win.getMouse()
@@ -142,6 +160,7 @@ if __name__ == '__main__':
             win.setBackground('light blue')
 
             canvas = Canvas(win)  # init the canvas
+            refresh()
 
             logging.info('A new game starts!')
 
@@ -155,6 +174,8 @@ if __name__ == '__main__':
                         [0, 0, 0, 0, 0, 0, 0, 0],
                         [0, 0, 0, 0, 0, 0, 0, 0]
                         ]
+
+            restart = False
 
             # Game Starts!
             while 1:
@@ -252,7 +273,7 @@ if __name__ == '__main__':
                                 best_place = easyModeAI.calculate.find_the_best(a)
 
                             # mediumMode
-                            elif difficultLevel == 1:
+                            elif difficultLevel == 2:
                                 sleep(0.2)
                                 a = mediumModeAI.calculate.intArray(64)
                                 for i in xrange(8):
@@ -261,7 +282,7 @@ if __name__ == '__main__':
                                 best_place = mediumModeAI.calculate.find_the_best(a)
 
                             # hardMode
-                            elif difficultLevel == 2:
+                            elif difficultLevel == 1:
                                 # canvas.show()
                                 a = hardModeAI.calculate.intArray(64)
                                 for i in xrange(8):
@@ -365,12 +386,20 @@ if __name__ == '__main__':
                             except Exception:
                                 pass
 
-                            black_turn.draw(win)
-                            canvas.restart(win)
-                            refresh()
+                            # black_turn.draw(win)
+                            # canvas.restart(win)
+                            # refresh()
+
+                            t_black.undraw()
+                            t_white.undraw()
+
+                            for item in text_column:
+                                item.undraw()
+                            for item in text_row:
+                                item.undraw()
 
                             b_re.clear()
-                            b_undo.redraw()
+                            # b_undo.redraw()
 
                             if who_win == 0:
                                 tie.undraw()
@@ -379,23 +408,31 @@ if __name__ == '__main__':
                             else:
                                 black_win.undraw()
 
-                            logging.info('A new game starts!')
+                            # logging.info('A new game starts!')
 
-                            undoList = [[0, 0, 0, 0, 0, 0, 0, 0],
-                                        [0, 0, 0, 0, 0, 0, 0, 0],
-                                        [0, 0, 0, 0, 0, 0, 0, 0],
-                                        [0, 0, 0, 1, 2, 0, 0, 0],
-                                        [0, 0, 0, 2, 1, 0, 0, 0],
-                                        [0, 0, 0, 0, 0, 0, 0, 0],
-                                        [0, 0, 0, 0, 0, 0, 0, 0],
-                                        [0, 0, 0, 0, 0, 0, 0, 0]
-                                        ]
+                            # undoList = [[0, 0, 0, 0, 0, 0, 0, 0],
+                            #             [0, 0, 0, 0, 0, 0, 0, 0],
+                            #             [0, 0, 0, 0, 0, 0, 0, 0],
+                            #             [0, 0, 0, 1, 2, 0, 0, 0],
+                            #             [0, 0, 0, 2, 1, 0, 0, 0],
+                            #             [0, 0, 0, 0, 0, 0, 0, 0],
+                            #             [0, 0, 0, 0, 0, 0, 0, 0],
+                            #             [0, 0, 0, 0, 0, 0, 0, 0]
+                            #             ]
+                            init_board()
+                            restart = True
                             break
 
                         elif b_qt.clicked(p3):
                             break
                 try:
-                    if b_qt.clicked(p3):
+                    if restart:
+                        break
+                except:
+                    pass
+
+                try:
+                    if restart:
                         break
                 except:
                     pass
